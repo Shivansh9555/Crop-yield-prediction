@@ -133,9 +133,12 @@ with tab2:
         col1, col2 = st.columns(2)
         col1.metric(label=f"{algo} R² Score", value=f"{details['r2']:.2%}")
         col2.metric(label=f"{algo} MSE", value=f"{details['mse']:.4f}")
-
 with tab3:
     st.subheader("Instant Simulation Form Tool")
+    
+    # Algorithm selector
+    algo_choice = st.selectbox("Select Algorithm", options=list(models.keys()))
+    
     c_col1, c_col2, c_col3 = st.columns(3)
     with c_col1:
         input_crop = st.selectbox("Target Production Crop", options=df['Crop_Type'].unique())
@@ -148,7 +151,7 @@ with tab3:
         input_p = st.number_input("Phosphorus Fertilizer Mix (kg/ha)", 15, 90, 50)
         input_k = st.number_input("Potassium Fertilizer Mix (kg/ha)", 15, 85, 45)
 
-    if st.button("Calculate Yield Predictions", type="primary"):
+    if st.button("Calculate Yield Prediction", type="primary"):
         input_payload = pd.DataFrame([{
             'Crop_Type': input_crop,
             'Rainfall_mm': input_rain,
@@ -159,10 +162,12 @@ with tab3:
             'Potassium_K': input_k
         }])
         
-        st.write("### Prediction Results")
-        for algo, details in models.items():
-            pred = details['model'].predict(input_payload)[0]
-            st.success(f"{algo} → **{pred:.2f} Tons / Hectare**")
+        # Use selected algorithm
+        selected_model = models[algo_choice]["model"]
+        pred = selected_model.predict(input_payload)[0]
+        
+        st.success(f"### {algo_choice} Prediction → **{pred:.2f} Tons / Hectare**")
+
 
 with tab4:
     st.subheader("Algorithm Performance Comparison")
