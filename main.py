@@ -13,7 +13,7 @@ from sklearn.pipeline import Pipeline
 # 1. PAGE CONFIGURATION
 st.set_page_config(
     page_title="AgriYield AI - Crop Prediction Platform",
-    page_icon="🌾",
+    page_icon=":)",
     layout="wide"
 )
 
