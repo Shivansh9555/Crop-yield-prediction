@@ -101,14 +101,14 @@ def train_models(data):
 models = train_models(df)
 
 # 4. FRONTEND STREAMLIT DESIGN
-st.title("🌾 Agriculture Crop Yield Assessment Platform")
+st.title("Agriculture Crop Yield Assessment Platform")
 st.markdown("An end-to-end predictive analytics framework for agricultural optimization.")
 
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Exploratory Data Analysis",
-    "⚙️ Model Intelligence Metrics",
-    "🔮 Predictive Simulator Engine",
-    "📈 Algorithm Comparison"
+    " Exploratory Data Analysis",
+    " Model Intelligence Metrics",
+    " Predictive Simulator Engine",
+    " Algorithm Comparison"
 ])
 
 with tab1:
