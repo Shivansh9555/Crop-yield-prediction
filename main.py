@@ -44,7 +44,8 @@ TARGET = "label"
 MODEL_DIR = "models"
 MODEL_PATH = os.path.join(MODEL_DIR, "crop_model.joblib")
 
-st.set_page_config(page_title="AgriYield AI - Crop Recommendation", page_icon="🌾", layout="wide")
+st.set_page_config(page_title="AgriYield AI - Crop Recommendation", page_icon="🌾", layout="wide",
+                   initial_sidebar_state="collapsed")
 
 # ----------------------------------------------------------------------------
 # 0b. DESIGN - custom CSS theme + small UI helpers
@@ -144,6 +145,85 @@ st.markdown(
     .footer {
         text-align: center; margin-top: 2.5rem; padding: 1rem; border-radius: 14px;
         background: rgba(46,125,50,.08); font-size: .88rem; opacity: .9;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+    .stMarkdown, .navbar, .hero2, .feat, .step, .title-block, .footer2, .result, .kpi, .sec,
+    .stTabs button, div.stButton button, label p {font-family: 'Poppins', sans-serif;}
+    [data-testid="stHeader"] {background: transparent;}
+
+    /* Navbar */
+    .navbar {display:flex; justify-content:space-between; align-items:center; padding:.8rem 1.3rem;
+        border-radius:16px; margin-bottom:1rem; background:rgba(46,125,50,.10);
+        border:1px solid rgba(46,125,50,.25); backdrop-filter: blur(8px);}
+    .navbar .brand-n {font-weight:800; font-size:1.25rem; color:#2e7d32;}
+    .navbar .right {display:flex; gap:.5rem; flex-wrap:wrap;}
+    .navbar .pill {background:#2e7d32; color:#fff; padding:.25rem .85rem; border-radius:999px;
+        font-size:.8rem; font-weight:600;}
+    .navbar .pill.ghost {background:transparent; color:#2e7d32; border:1px solid #2e7d32;}
+
+    /* Hero */
+    .hero2 {display:grid; grid-template-columns:1.4fr 1fr; gap:1rem; align-items:center;
+        border-radius:28px; padding:3rem; color:#fff; margin-bottom:1.5rem; position:relative; overflow:hidden;
+        background:linear-gradient(120deg,#0b3d12 0%,#1b5e20 35%,#43a047 100%);
+        box-shadow:0 20px 50px rgba(27,94,32,.4);}
+    .hero2 h1 {font-size:3rem; font-weight:800; line-height:1.1; margin:0 0 .8rem; color:#fff;}
+    .hero2 h1 span {color:#c5e1a5;}
+    .hero2 p {font-size:1.1rem; opacity:.92; color:#fff; margin:0 0 1.3rem;}
+    .cta {display:inline-block; background:#fff; color:#1b5e20; font-weight:700; padding:.7rem 1.6rem;
+        border-radius:999px; box-shadow:0 8px 20px rgba(0,0,0,.25);}
+    .float-wrap {position:relative; height:260px;}
+    .float-wrap .f {position:absolute; font-size:3.4rem; animation: floaty 5s ease-in-out infinite;
+        filter: drop-shadow(0 8px 10px rgba(0,0,0,.3));}
+    @keyframes floaty {0%,100% {transform:translateY(0) rotate(0deg);} 50% {transform:translateY(-18px) rotate(6deg);}}
+
+    /* Feature cards */
+    .feat-grid {display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin:.5rem 0 1.5rem;}
+    .feat {background:rgba(46,125,50,.07); border:1px solid rgba(46,125,50,.22); border-radius:18px;
+        padding:1.3rem; transition:all .2s ease;}
+    .feat:hover {transform:translateY(-6px); box-shadow:0 12px 26px rgba(46,125,50,.25);}
+    .feat .ic {font-size:2.2rem;}
+    .feat h4 {margin:.5rem 0 .3rem; color:#2e7d32; font-size:1.05rem;}
+    .feat p {margin:0; font-size:.88rem; opacity:.8;}
+
+    /* How it works */
+    .steps {display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1rem;}
+    .step {display:flex; gap:1rem; align-items:flex-start; padding:1.1rem; border-radius:18px;
+        background:linear-gradient(135deg,rgba(46,125,50,.10),rgba(102,187,106,.06));
+        border:1px dashed rgba(46,125,50,.4);}
+    .step .n {flex:0 0 2.6rem; height:2.6rem; border-radius:50%; background:#2e7d32; color:#fff;
+        font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.2rem;}
+    .step h4 {margin:0 0 .2rem; font-size:1rem;}
+    .step p {margin:0; font-size:.86rem; opacity:.8;}
+
+    /* Centered titles */
+    .title-block {text-align:center; margin:2rem 0 1rem;}
+    .title-block h2 {font-size:2rem; font-weight:800; margin:0;}
+    .title-block p {opacity:.75; margin:.3rem 0 0;}
+    .title-block .bar {width:70px; height:5px; border-radius:5px; margin:.7rem auto 0;
+        background:linear-gradient(90deg,#2e7d32,#a5d6a7);}
+
+    /* Footer */
+    .footer2 {margin-top:3rem; border-radius:24px; padding:2rem; color:#fff;
+        background:linear-gradient(120deg,#0b3d12,#1b5e20); display:grid;
+        grid-template-columns:1.5fr 1fr 1fr; gap:1.5rem;}
+    .footer2 h4 {margin:0 0 .6rem; color:#c5e1a5;}
+    .footer2 p, .footer2 li {font-size:.88rem; opacity:.92; color:#fff; margin:.2rem 0;}
+    .footer2 ul {list-style:none; padding:0; margin:0;}
+    .copy {text-align:center; opacity:.7; font-size:.8rem; margin-top:.8rem;}
+
+    @media (max-width: 900px) {
+        .hero2 {grid-template-columns:1fr; padding:2rem;} .hero2 h1 {font-size:2.1rem;}
+        .feat-grid {grid-template-columns:1fr 1fr;} .steps {grid-template-columns:1fr;}
+        .footer2 {grid-template-columns:1fr;} .float-wrap {display:none;}
     }
     </style>
     """,
@@ -390,14 +470,30 @@ st.sidebar.caption(f"Train rows: {bundle['n_train']} | Test rows: {bundle['n_tes
 # 5. MAIN UI
 # ----------------------------------------------------------------------------
 st.markdown(
-    """
-    <div class="hero">
-        <h1>🌾 AgriYield AI</h1>
-        <p>Smart crop recommendation from soil and weather data - the model trains itself automatically.</p>
-        <span class="badge">🌡️ Live weather</span>
-        <span class="badge">🧪 Soil N-P-K &amp; pH</span>
-        <span class="badge">🤖 Auto-training</span>
-        <span class="badge">📊 5-model comparison</span>
+    f"""
+    <div class="navbar">
+        <div class="brand-n">🌾 AgriYield AI</div>
+        <div class="right">
+            <span class="pill ghost">Weather + Soil</span>
+            <span class="pill ghost">Auto-trained ML</span>
+            <span class="pill">● Model ready: {bundle['best_name']}</span>
+        </div>
+    </div>
+    <div class="hero2">
+        <div>
+            <h1>Grow the <span>right crop</span>,<br>every season.</h1>
+            <p>Enter your soil nutrients and local weather - our machine learning model instantly
+            recommends the most suitable crop for your field. No setup, it trains itself.</p>
+            <span class="cta">👇 Try the predictor below</span>
+        </div>
+        <div class="float-wrap">
+            <span class="f" style="left:8%; top:10%; animation-delay:0s;">🌾</span>
+            <span class="f" style="left:55%; top:2%; animation-delay:.8s;">🌽</span>
+            <span class="f" style="left:30%; top:42%; animation-delay:1.6s;">🍇</span>
+            <span class="f" style="left:70%; top:48%; animation-delay:2.4s;">🥭</span>
+            <span class="f" style="left:6%; top:72%; animation-delay:3.2s;">🍌</span>
+            <span class="f" style="left:52%; top:76%; animation-delay:4s;">🍊</span>
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -409,7 +505,26 @@ kpi(k1, bundle["best_name"], "Best model")
 kpi(k2, f"{best_row['Accuracy']:.1%}", "Test accuracy")
 kpi(k3, str(len(bundle["classes"])), "Crops supported")
 kpi(k4, f"{len(df):,}", "Training samples")
-st.write("")
+
+st.markdown(
+    """
+    <div class="title-block"><h2>Why AgriYield AI?</h2><p>Smart farming decisions powered by data</p><div class="bar"></div></div>
+    <div class="feat-grid">
+        <div class="feat"><div class="ic">🌦️</div><h4>Live Weather</h4><p>Fetch real temperature, humidity and rainfall for your city in one click.</p></div>
+        <div class="feat"><div class="ic">🧪</div><h4>Soil Analysis</h4><p>Uses Nitrogen, Phosphorus, Potassium and pH to understand your soil.</p></div>
+        <div class="feat"><div class="ic">🤖</div><h4>Auto-Trained AI</h4><p>The model trains itself on first run and re-trains when data changes.</p></div>
+        <div class="feat"><div class="ic">📊</div><h4>5-Model Comparison</h4><p>Accuracy, Precision, Recall and F1 compared to pick the best algorithm.</p></div>
+    </div>
+    <div class="title-block"><h2>How it works</h2><p>Three simple steps</p><div class="bar"></div></div>
+    <div class="steps">
+        <div class="step"><div class="n">1</div><div><h4>Enter weather</h4><p>Type values or fetch live weather by city name.</p></div></div>
+        <div class="step"><div class="n">2</div><div><h4>Enter soil data</h4><p>Add N, P, K and pH from your soil test report.</p></div></div>
+        <div class="step"><div class="n">3</div><div><h4>Get recommendation</h4><p>See the best crop, top 3 options and how your field compares.</p></div></div>
+    </div>
+    <div class="title-block"><h2>🚀 Try the Crop Predictor</h2><p>Fill in the details and let the model decide</p><div class="bar"></div></div>
+    """,
+    unsafe_allow_html=True,
+)
 
 tab_predict, tab_compare, tab_data = st.tabs(["🌱 Crop Predictor", "📊 Model Comparison", "🗂️ Data Explorer"])
 
@@ -564,7 +679,13 @@ with tab_data:
         st.pyplot(fig2)
 
 st.markdown(
-    '<div class="footer">🌱 <b>AgriYield AI</b> - Crop recommendation using weather &amp; soil data '
-    '| Built with Streamlit &amp; scikit-learn | Mini Project</div>',
+    """
+    <div class="footer2">
+        <div><h4>🌾 AgriYield AI</h4><p>Smart crop recommendation using weather and soil data. A machine learning mini project that trains itself automatically.</p></div>
+        <div><h4>Tech stack</h4><ul><li>🐍 Python</li><li>🎈 Streamlit</li><li>🧠 scikit-learn</li><li>🌐 Open-Meteo weather API</li></ul></div>
+        <div><h4>Features</h4><ul><li>✔ Crop recommendation</li><li>✔ Live weather fetch</li><li>✔ 5-model comparison</li><li>✔ Upload your own CSV</li></ul></div>
+    </div>
+    <div class="copy">Built with 💚 for farmers | Mini Project</div>
+    """,
     unsafe_allow_html=True,
 )
