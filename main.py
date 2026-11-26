@@ -9,7 +9,7 @@ AgriYield AI v2 - Smart Crop Recommendation using Weather + Soil Data
 
 Run:
     pip install streamlit pandas numpy scikit-learn matplotlib seaborn joblib requests
-    streamlit run crop_recommendation_app.py
+    streamlit run main.py
 """
 
 import os
@@ -45,6 +45,119 @@ MODEL_DIR = "models"
 MODEL_PATH = os.path.join(MODEL_DIR, "crop_model.joblib")
 
 st.set_page_config(page_title="AgriYield AI - Crop Recommendation", page_icon="🌾", layout="wide")
+
+# ----------------------------------------------------------------------------
+# 0b. DESIGN - custom CSS theme + small UI helpers
+# ----------------------------------------------------------------------------
+CROP_EMOJI = {
+    "rice": "🌾", "maize": "🌽", "chickpea": "🫘", "kidneybeans": "🫘", "pigeonpeas": "🫛",
+    "mothbeans": "🫘", "mungbean": "🫛", "blackgram": "🫘", "lentil": "🫘", "pomegranate": "🍎",
+    "banana": "🍌", "mango": "🥭", "grapes": "🍇", "watermelon": "🍉", "muskmelon": "🍈",
+    "apple": "🍏", "orange": "🍊", "papaya": "🥭", "coconut": "🥥", "cotton": "☁️",
+    "jute": "🌿", "coffee": "☕",
+}
+
+st.markdown(
+    """
+    <style>
+    .block-container {padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1250px;}
+    #MainMenu, footer {visibility: hidden;}
+
+    /* Hero banner */
+    .hero {
+        background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 45%, #66bb6a 100%);
+        border-radius: 22px; padding: 2.2rem 2.4rem; color: #fff; margin-bottom: 1.4rem;
+        box-shadow: 0 10px 30px rgba(27,94,32,.35); position: relative; overflow: hidden;
+    }
+    .hero::after {
+        content: "🌱"; position: absolute; right: 28px; bottom: -18px; font-size: 130px; opacity: .18;
+    }
+    .hero h1 {margin: 0; font-size: 2.3rem; font-weight: 800; color: #fff;}
+    .hero p {margin: .5rem 0 0; font-size: 1.05rem; opacity: .95; color: #fff;}
+    .badge {
+        display: inline-block; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35);
+        border-radius: 999px; padding: .2rem .8rem; margin: .8rem .4rem 0 0; font-size: .82rem; color: #fff;
+    }
+
+    /* KPI cards */
+    .kpi {
+        background: rgba(46,125,50,.08); border: 1px solid rgba(46,125,50,.25);
+        border-left: 6px solid #2e7d32; border-radius: 14px; padding: .9rem 1.1rem;
+    }
+    .kpi .v {font-size: 1.6rem; font-weight: 800; color: #2e7d32; line-height: 1.2;}
+    .kpi .l {font-size: .82rem; opacity: .75; text-transform: uppercase; letter-spacing: .05em;}
+
+    /* Section titles */
+    .sec {
+        display: flex; align-items: center; gap: .6rem; font-size: 1.25rem; font-weight: 700;
+        margin: 1.2rem 0 .6rem; padding-bottom: .35rem; border-bottom: 2px solid rgba(46,125,50,.35);
+    }
+    .sec span.dot {
+        background: #2e7d32; color: #fff; width: 1.9rem; height: 1.9rem; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center; font-size: .95rem;
+    }
+
+    /* Result card */
+    .result {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9); color: #1b5e20; border-radius: 20px;
+        padding: 1.6rem 2rem; text-align: center; border: 2px solid #66bb6a;
+        box-shadow: 0 8px 24px rgba(46,125,50,.25); margin: 1rem 0;
+    }
+    .result .emoji {font-size: 4rem; line-height: 1;}
+    .result .name {font-size: 2.2rem; font-weight: 800; margin: .3rem 0 0;}
+    .result .sub {font-size: 1rem; opacity: .85;}
+    .meter {background: rgba(27,94,32,.15); border-radius: 999px; height: 12px; margin: .8rem auto 0; max-width: 360px;}
+    .meter > div {background: linear-gradient(90deg,#43a047,#1b5e20); height: 12px; border-radius: 999px;}
+
+    /* Buttons & tabs */
+    div.stButton > button {
+        border-radius: 12px; font-weight: 700; padding: .55rem 1.4rem; border: 1px solid #2e7d32;
+        transition: all .15s ease;
+    }
+    div.stButton > button:hover {transform: translateY(-2px); box-shadow: 0 6px 14px rgba(46,125,50,.35);}
+    div.stButton > button[kind="primary"] {background: linear-gradient(90deg,#2e7d32,#43a047); color: #fff; border: none;}
+    button[data-baseweb="tab"] {font-weight: 700; font-size: 1rem;}
+    [data-testid="stSidebar"] {border-right: 2px solid rgba(46,125,50,.25);}
+
+    /* Soft background glow */
+    [data-testid="stAppViewContainer"] {
+        background-image: radial-gradient(circle at 12% 8%, rgba(102,187,106,.14), transparent 38%),
+                          radial-gradient(circle at 92% 90%, rgba(46,125,50,.12), transparent 40%);
+    }
+
+    /* Input panels (st.container(border=True)) */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        border-radius: 18px !important; border: 1px solid rgba(46,125,50,.30) !important;
+        background: rgba(46,125,50,.04); box-shadow: 0 4px 14px rgba(46,125,50,.08);
+    }
+
+    /* Sidebar brand */
+    .brand {
+        display: flex; align-items: center; gap: .7rem; padding: .8rem 1rem; border-radius: 14px;
+        background: linear-gradient(135deg,#2e7d32,#66bb6a); color: #fff; margin-bottom: 1rem;
+    }
+    .brand .logo {font-size: 2rem;}
+    .brand .t {font-weight: 800; font-size: 1.1rem; line-height: 1.1;}
+    .brand .s {font-size: .75rem; opacity: .9;}
+
+    /* Footer */
+    .footer {
+        text-align: center; margin-top: 2.5rem; padding: 1rem; border-radius: 14px;
+        background: rgba(46,125,50,.08); font-size: .88rem; opacity: .9;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+def section(num: str, title: str):
+    st.markdown(f'<div class="sec"><span class="dot">{num}</span>{title}</div>', unsafe_allow_html=True)
+
+
+def kpi(col, value: str, label: str):
+    col.markdown(f'<div class="kpi"><div class="v">{value}</div><div class="l">{label}</div></div>',
+                 unsafe_allow_html=True)
 
 
 # ----------------------------------------------------------------------------
@@ -244,7 +357,12 @@ def apply_weather_to_inputs():
 if "retrain_token" not in st.session_state:
     st.session_state["retrain_token"] = 0
 
-st.sidebar.header("Dataset & Training")
+st.sidebar.markdown(
+    '<div class="brand"><div class="logo">🌾</div><div><div class="t">AgriYield AI</div>'
+    '<div class="s">Smart crop recommendation</div></div></div>',
+    unsafe_allow_html=True,
+)
+st.sidebar.subheader("⚙️ Dataset & Training")
 source = st.sidebar.radio("Training data", ["Built-in synthetic dataset", "Upload my own CSV"])
 
 df = generate_builtin_dataset()
@@ -271,42 +389,64 @@ st.sidebar.caption(f"Train rows: {bundle['n_train']} | Test rows: {bundle['n_tes
 # ----------------------------------------------------------------------------
 # 5. MAIN UI
 # ----------------------------------------------------------------------------
-st.title("🌾 AgriYield AI - Smart Crop Recommendation")
-st.markdown("Recommends the most suitable crop from **soil data** (N, P, K, pH) and **weather data** "
-            "(temperature, humidity, rainfall). The model trains itself automatically.")
+st.markdown(
+    """
+    <div class="hero">
+        <h1>🌾 AgriYield AI</h1>
+        <p>Smart crop recommendation from soil and weather data - the model trains itself automatically.</p>
+        <span class="badge">🌡️ Live weather</span>
+        <span class="badge">🧪 Soil N-P-K &amp; pH</span>
+        <span class="badge">🤖 Auto-training</span>
+        <span class="badge">📊 5-model comparison</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-tab_predict, tab_compare, tab_data = st.tabs(["Crop Predictor", "Model Comparison", "Data Explorer"])
+best_row = metrics.iloc[0]
+k1, k2, k3, k4 = st.columns(4)
+kpi(k1, bundle["best_name"], "Best model")
+kpi(k2, f"{best_row['Accuracy']:.1%}", "Test accuracy")
+kpi(k3, str(len(bundle["classes"])), "Crops supported")
+kpi(k4, f"{len(df):,}", "Training samples")
+st.write("")
+
+tab_predict, tab_compare, tab_data = st.tabs(["🌱 Crop Predictor", "📊 Model Comparison", "🗂️ Data Explorer"])
 
 # ---------------- TAB 1: PREDICTOR ----------------
 with tab_predict:
-    st.subheader("1. Weather data")
-    wc1, wc2 = st.columns([3, 1])
-    wc1.text_input("City (to fetch live weather)", value="Delhi", key="city_input")
-    wc2.write("")
-    wc2.write("")
-    wc2.button("Fetch live weather", on_click=apply_weather_to_inputs)
-    if "weather_msg" in st.session_state:
-        kind, msg = st.session_state["weather_msg"]
-        (st.success if kind == "ok" else st.error)(msg)
+    section("1", "🌦️ Weather data")
+    with st.container(border=True):
+        wc1, wc2 = st.columns([3, 1])
+        wc1.text_input("📍 City (to fetch live weather)", value="Delhi", key="city_input")
+        wc2.write("")
+        wc2.write("")
+        wc2.button("📡 Fetch live weather", on_click=apply_weather_to_inputs, use_container_width=True)
+        if "weather_msg" in st.session_state:
+            kind, msg = st.session_state["weather_msg"]
+            (st.success if kind == "ok" else st.error)(msg)
 
-    w1, w2, w3 = st.columns(3)
-    temperature = w1.number_input("Temperature (°C)", 8.0, 44.0, 25.0, 0.1, key="in_temp")
-    humidity = w2.number_input("Humidity (%)", 10.0, 100.0, 70.0, 0.5, key="in_hum")
-    rainfall = w3.number_input("Rainfall (mm, last 30 days / season)", 20.0, 300.0, 100.0, 1.0, key="in_rain")
+        w1, w2, w3 = st.columns(3)
+        temperature = w1.number_input("🌡️ Temperature (°C)", 8.0, 44.0, 25.0, 0.1, key="in_temp")
+        humidity = w2.number_input("💧 Humidity (%)", 10.0, 100.0, 70.0, 0.5, key="in_hum")
+        rainfall = w3.number_input("🌧️ Rainfall (mm, last 30 days / season)", 20.0, 300.0, 100.0, 1.0, key="in_rain")
 
-    st.subheader("2. Soil data")
-    s1, s2, s3, s4 = st.columns(4)
-    N = s1.number_input("Nitrogen N (kg/ha)", 0, 140, 60)
-    P = s2.number_input("Phosphorus P (kg/ha)", 5, 145, 50)
-    K = s3.number_input("Potassium K (kg/ha)", 5, 205, 45)
-    ph = s4.number_input("Soil pH", 3.5, 9.9, 6.5, 0.1)
+    section("2", "🧪 Soil data")
+    with st.container(border=True):
+        s1, s2, s3, s4 = st.columns(4)
+        N = s1.number_input("🟦 Nitrogen N (kg/ha)", 0, 140, 60)
+        P = s2.number_input("🟧 Phosphorus P (kg/ha)", 5, 145, 50)
+        K = s3.number_input("🟪 Potassium K (kg/ha)", 5, 205, 45)
+        ph = s4.number_input("⚗️ Soil pH", 3.5, 9.9, 6.5, 0.1)
 
+    section("3", "🤖 Algorithm")
     algo_choice = st.selectbox(
         "Algorithm",
         ["Best model (auto-selected)"] + list(models.keys()),
+        label_visibility="collapsed",
     )
 
-    if st.button("Recommend Crop", type="primary"):
+    if st.button("🌾 Recommend Crop", type="primary", use_container_width=True):
         chosen = bundle["best_name"] if algo_choice.startswith("Best") else algo_choice
         model = models[chosen]
         x = pd.DataFrame([[N, P, K, temperature, humidity, ph, rainfall]], columns=FEATURES)
@@ -315,20 +455,55 @@ with tab_predict:
         order = np.argsort(proba)[::-1][:3]
         classes = model.classes_
 
-        st.success(f"### Recommended crop: **{classes[order[0]].title()}**  "
-                   f"(confidence {proba[order[0]]:.1%}) - using {chosen}")
+        top_crop = classes[order[0]]
+        st.markdown(
+            f"""
+            <div class="result">
+                <div class="emoji">{CROP_EMOJI.get(top_crop, "🌱")}</div>
+                <div class="sub">Recommended crop for your field</div>
+                <div class="name">{top_crop.title()}</div>
+                <div class="sub">Confidence {proba[order[0]]:.1%} &nbsp;|&nbsp; Model: {chosen}</div>
+                <div class="meter"><div style="width:{proba[order[0]] * 100:.0f}%"></div></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
+        section("4", "🏆 Top 3 suggestions")
         top = pd.DataFrame({
-            "Crop": [classes[i].title() for i in order],
+            "Crop": [f"{CROP_EMOJI.get(classes[i], '🌱')} {classes[i].title()}" for i in order],
             "Confidence": [proba[i] for i in order],
         })
         c1, c2 = st.columns([1, 2])
         c1.dataframe(top.style.format({"Confidence": "{:.1%}"}), use_container_width=True, hide_index=True)
         fig, ax = plt.subplots(figsize=(6, 2.5))
-        sns.barplot(data=top, x="Confidence", y="Crop", color="seagreen", ax=ax)
+        plain = top["Crop"].str.split(" ", n=1).str[1]
+        sns.barplot(x=top["Confidence"], y=plain, hue=plain, legend=False,
+                    palette=["#1b5e20", "#43a047", "#a5d6a7"], ax=ax)
+        ax.set_ylabel("Crop")
         ax.set_xlim(0, 1)
         ax.set_title("Top 3 crop suggestions")
         c2.pyplot(fig)
+
+        # your field vs typical conditions for the recommended crop
+        if top_crop in CROP_PROFILES:
+            section("5", f"📋 Your field vs typical conditions for {top_crop.title()}")
+            labels = ["Nitrogen N", "Phosphorus P", "Potassium K", "Temperature (°C)",
+                      "Humidity (%)", "Soil pH", "Rainfall (mm)"]
+            yours = [N, P, K, temperature, humidity, ph, rainfall]
+            ideal = CROP_PROFILES[top_crop]
+            compare_df = pd.DataFrame({
+                "Parameter": labels,
+                "Your field": yours,
+                "Typical for crop": ideal,
+            })
+            compare_df["Difference"] = compare_df["Your field"] - compare_df["Typical for crop"]
+            st.dataframe(
+                compare_df.style.format({"Your field": "{:.1f}", "Typical for crop": "{:.1f}", "Difference": "{:+.1f}"})
+                .background_gradient(subset=["Difference"], cmap="RdYlGn_r", vmin=-60, vmax=60),
+                use_container_width=True, hide_index=True,
+            )
+            st.caption("Typical values are the average growing conditions used to build the built-in dataset.")
 
         # warn if inputs are outside the training data
         out = [f for f, v in zip(FEATURES, x.iloc[0]) if not (bundle["feature_ranges"][f][0] <= v <= bundle["feature_ranges"][f][1])]
@@ -337,7 +512,7 @@ with tab_predict:
 
 # ---------------- TAB 2: MODEL COMPARISON ----------------
 with tab_compare:
-    st.subheader("Algorithm performance (on held-out 20% test data)")
+    section("📊", "Algorithm performance (held-out 20% test data)")
     st.dataframe(
         metrics.style.format({c: "{:.2%}" for c in ["Accuracy", "Precision", "Recall", "F1 Score"]})
         .highlight_max(subset=["Accuracy", "Precision", "Recall", "F1 Score"], color="#c8e6c9"),
@@ -372,7 +547,7 @@ with tab_compare:
 
 # ---------------- TAB 3: DATA EXPLORER ----------------
 with tab_data:
-    st.subheader("Dataset preview")
+    section("🗂️", "Dataset preview")
     st.write(f"{len(df)} rows | {df[TARGET].nunique()} crops")
     st.dataframe(df.head(20), use_container_width=True)
 
@@ -387,3 +562,9 @@ with tab_data:
         sns.scatterplot(data=df, x="temperature", y="rainfall", hue=TARGET, ax=ax2, legend=False, s=15)
         ax2.set_title("Temperature vs Rainfall (coloured by crop)")
         st.pyplot(fig2)
+
+st.markdown(
+    '<div class="footer">🌱 <b>AgriYield AI</b> - Crop recommendation using weather &amp; soil data '
+    '| Built with Streamlit &amp; scikit-learn | Mini Project</div>',
+    unsafe_allow_html=True,
+)
